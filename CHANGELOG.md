@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/dvonrohr/pimcore-skeleton/compare/v1.0.1...v1.1.0) (2025-02-21)
+
+
+### Features
+
+* add error code to force sonarqube ([e6a1ee8](https://github.com/dvonrohr/pimcore-skeleton/commit/e6a1ee8cf5cacb128b63a7df1eeee5f784cdf305))
+
 ## [1.0.1](https://github.com/dvonrohr/pimcore-skeleton/compare/v1.0.0...v1.0.1) (2025-02-21)
 
 
