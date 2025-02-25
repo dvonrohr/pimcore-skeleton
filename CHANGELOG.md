@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.1.0](https://github.com/dvonrohr/pimcore-skeleton/compare/v1.0.1...v1.1.0) (2025-02-25)
+
+
+### Features
+
+* add error code to force sonarqube ([e6a1ee8](https://github.com/dvonrohr/pimcore-skeleton/commit/e6a1ee8cf5cacb128b63a7df1eeee5f784cdf305))
+
+
+### Miscellaneous Chores
+
+* add .env vars for testing ([32de17b](https://github.com/dvonrohr/pimcore-skeleton/commit/32de17ba64cb02bd35a313f35f93725dac47960f))
+* add dependency installation step in PHPStan workflow ([baef8e2](https://github.com/dvonrohr/pimcore-skeleton/commit/baef8e2fc79d00de7fcc94c359c376ac7182ba35))
+* add fossa github action ([33ed0c6](https://github.com/dvonrohr/pimcore-skeleton/commit/33ed0c65262462209e4c32b96a5bf59505698306))
+* add php v8.3 to phpstand github action ([909264f](https://github.com/dvonrohr/pimcore-skeleton/commit/909264ffc64f3238f9a64636ce78f0e8fe66f31e))
+* add phpstan github workflow ([76f89b9](https://github.com/dvonrohr/pimcore-skeleton/commit/76f89b9080fa9677c5ab0e28859bdb61d5299369))
+* add phpstan.neon.dist configuration file ([73a5b7b](https://github.com/dvonrohr/pimcore-skeleton/commit/73a5b7b85c7d0858ae13d95e9eeec8886c58d409))
+* change phpstan.neon config ([8e3c2ff](https://github.com/dvonrohr/pimcore-skeleton/commit/8e3c2ff3d5378c013a2d94d64e0e3704508c5495))
+* dont install composer packages ([b90254e](https://github.com/dvonrohr/pimcore-skeleton/commit/b90254e3708ab9afc7de973dcf47e90655f828c6))
+* improve phpstand github action config ([be02727](https://github.com/dvonrohr/pimcore-skeleton/commit/be027274b894e2e0500724123f0eda778bac88bc))
+* install composer dependencies ([95e8373](https://github.com/dvonrohr/pimcore-skeleton/commit/95e837343f21ea480d0efeb803b3f4fdcd8cbe66))
+* more changes to phpstan.yml ([a87a025](https://github.com/dvonrohr/pimcore-skeleton/commit/a87a025e1be8a0424fc6dd558ffcf409b39f72fb))
+* more phpstan config ([280164c](https://github.com/dvonrohr/pimcore-skeleton/commit/280164c9c326064b0b8435c2ddc3a4f3dae2d41a))
+* prepare directories for PHPStan workflow ([15827b8](https://github.com/dvonrohr/pimcore-skeleton/commit/15827b866c9bc0170324ff451bdd516648378d6c))
+* rebuild pimcore classes ([6d1eae1](https://github.com/dvonrohr/pimcore-skeleton/commit/6d1eae1d914c76a00130a98f717f060d4c7900b6))
+* some more config ([5e40621](https://github.com/dvonrohr/pimcore-skeleton/commit/5e4062150b0b9141a3c5edefe3a1230373bc0c81))
+* update environment for testing and adjust directory permissions in PHPStan workflow ([f4d7cec](https://github.com/dvonrohr/pimcore-skeleton/commit/f4d7cece8d168f53ea6fe5ce683a1a14bbece61d))
+* update PHP version in PHPStan workflow to 8.3 ([694f6a6](https://github.com/dvonrohr/pimcore-skeleton/commit/694f6a6f5943622cdde71764aac2cbf85605eff6))
+* update PHPStan workflow and configuration for improved analysis ([b786af2](https://github.com/dvonrohr/pimcore-skeleton/commit/b786af27c20c2c747df332a8386e2b27ccb9d37f))
+* update PHPStan workflow to include PHP 8.2 setup and install dependencies ([968a3ec](https://github.com/dvonrohr/pimcore-skeleton/commit/968a3ec056a1b7254ddee0ff5ad18287cf61d870))
+* update PHPStan workflow to set environment variables for testing ([6c39bf2](https://github.com/dvonrohr/pimcore-skeleton/commit/6c39bf2693af76fb88b0c1c14cfa7c07a8b33181))
+* use phpstan binary ([f28033f](https://github.com/dvonrohr/pimcore-skeleton/commit/f28033f6aaabd71502de6ab54f8b2c32ed01e82d))
+
 ## [1.0.1](https://github.com/dvonrohr/pimcore-skeleton/compare/v1.0.0...v1.0.1) (2025-02-21)
 
 
