@@ -25,10 +25,11 @@ jobs:
 
       - name: Prepare directories
         run: |
-          mkdir -p var/classes
-          mkdir -p vendor/pimcore/pimcore/tests/_output/var/classes
-          chmod -R 777 var
-          chmod -R 777 vendor/pimcore/pimcore/tests/_output
+          sudo mkdir -p var/classes
+          sudo mkdir -p vendor/pimcore
+          sudo mkdir -p vendor/pimcore/pimcore/tests/_output/var/classes
+          sudo chmod -R 777 var
+          sudo chmod -R 777 vendor
 
       - name: Rebuild Pimcore classes
         env:
