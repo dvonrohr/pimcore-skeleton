@@ -8,17 +8,20 @@ jobs:
     
     steps:
       - uses: actions/checkout@v3
+        with:
+          safe-directory: /app
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, mysql, zip, exif, gd, xsl
 
-      - name: Verify PHPStan config
-        run: |
-          ls -la
-          cat phpstan.neon
+      - name: Install Composer dependencies
+        uses: php-actions/composer@v6
+        with:
+          php_version: '8.3'
+          args: --ignore-platform-reqs --no-scripts
 
       - name: Download PHPStan
         run: |
@@ -27,4 +30,4 @@ jobs:
 
       - name: Run PHPStan
         run: |
-          PHP_VERSION=8.3 ./phpstan.phar analyse --configuration phpstan.neon --no-progress
+          PHP_VERSION=8.3 ./phpstan.phar analyse --configuration phpstan.neon --no-progress --autoload-file vendor/autoload.php
