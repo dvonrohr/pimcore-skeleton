@@ -6,6 +6,9 @@ jobs:
   phpstan:
     name: phpstan
     runs-on: ubuntu-latest
+    env:
+      PIMCORE_TEST: 1
+      APP_ENV: test
     steps:
       - name: Checkout project
         uses: actions/checkout@v2
@@ -19,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer install --no-progress --prefer-dist --optimize-autoloader
+          composer install --no-progress --prefer-dist --optimize-autoloader --no-scripts
 
       - name: Run phpstan
         uses: actions-x/phpstan@v1
