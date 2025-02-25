@@ -15,6 +15,11 @@ jobs:
           php-version: '8.3'
           extensions: mbstring
 
+      - name: Verify PHPStan config
+        run: |
+          ls -la
+          cat phpstan.neon
+
       - name: Download PHPStan
         run: |
           wget https://github.com/phpstan/phpstan/releases/download/1.10.50/phpstan.phar
@@ -22,4 +27,4 @@ jobs:
 
       - name: Run PHPStan
         run: |
-          PHP_VERSION=8.3 ./phpstan.phar analyse src/ --level=5 --configuration=phpstan.neon --no-progress
+          PHP_VERSION=8.3 ./phpstan.phar analyse --configuration phpstan.neon --no-progress
