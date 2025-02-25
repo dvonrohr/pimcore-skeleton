@@ -8,10 +8,24 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: php-actions/composer@v6
+      with:
+        safe-directory: /app
+
+    - name: Setup PHP with extensions
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: xsl, gd, exif, intl, sodium
+
+    - name: Install dependencies
+      uses: php-actions/composer@v6
+      with:
+        args: --ignore-platform-req=ext-xsl --ignore-platform-req=ext-gd --ignore-platform-req=ext-exif --ignore-platform-req=ext-intl
+        version: 2.6.5
+
     - uses: php-actions/phpstan@v3
       with:
         path: src/
         level: 5
         configuration: phpstan.neon
-        php_version: 8.3
+        php_version: '8.2'
