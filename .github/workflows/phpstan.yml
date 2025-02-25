@@ -23,6 +23,13 @@ jobs:
           php_version: '8.3'
           args: --ignore-platform-reqs --no-scripts
 
+      - name: Prepare directories
+        run: |
+          mkdir -p var/classes
+          mkdir -p vendor/pimcore/pimcore/tests/_output/var/classes
+          chmod -R 777 var
+          chmod -R 777 vendor/pimcore/pimcore/tests/_output
+
       - name: Rebuild Pimcore classes
         env:
           APP_ENV: test
