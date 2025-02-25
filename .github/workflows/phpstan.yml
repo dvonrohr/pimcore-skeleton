@@ -8,25 +8,18 @@ jobs:
     
     steps:
       - uses: actions/checkout@v3
-        with:
-          safe-directory: /app
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: xsl, gd, exif, intl, sodium
+          extensions: mbstring
 
-      - name: Install Composer dependencies
-        uses: php-actions/composer@v6
-        with:
-          php_version: '8.3'
-          args: --ignore-platform-reqs
+      - name: Download PHPStan
+        run: |
+          wget https://github.com/phpstan/phpstan/releases/download/1.10.50/phpstan.phar
+          chmod +x phpstan.phar
 
-      - name: PHPStan Static Analysis
-        uses: php-actions/phpstan@v3
-        with:
-          path: src/
-          level: 5
-          configuration: phpstan.neon
-          php_version: '8.3'
+      - name: Run PHPStan
+        run: |
+          PHP_VERSION=8.3 ./phpstan.phar analyse src/ --level=5 --configuration=phpstan.neon --no-progress
