@@ -14,3 +14,4 @@ jobs:
         path: src/
         level: 5
         configuration: phpstan.neon
+        php_version: 8.3
