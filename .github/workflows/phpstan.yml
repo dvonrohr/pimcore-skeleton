@@ -24,6 +24,10 @@ jobs:
         run: |
           composer install --no-progress --prefer-dist --optimize-autoloader --no-scripts
 
+      - name: Install dependencies
+        run: |
+          bin/console pimcore:build:classes
+
       - name: Run phpstan
         uses: actions-x/phpstan@v1
         with:
