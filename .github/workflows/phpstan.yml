@@ -4,48 +4,19 @@ on: [push]
 
 jobs:
   phpstan:
+    name: phpstan
     runs-on: ubuntu-latest
-    
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout project
+        uses: actions/checkout@v2
+
+      - name: Run phpstan
+        uses: actions-x/phpstan@v1
         with:
-          safe-directory: /app
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, mysql, zip, exif, gd, xsl
-
-      - name: Install Composer dependencies
-        uses: php-actions/composer@v6
-        with:
-          php_version: '8.3'
-          args: --ignore-platform-reqs --no-scripts
-
-      - name: Prepare directories
-        run: |
-          sudo mkdir -p var/classes
-          sudo mkdir -p vendor/pimcore
-          sudo mkdir -p vendor/pimcore/pimcore/tests/_output/var/classes
-          sudo chmod -R 777 var
-          sudo chmod -R 777 vendor
-
-      - name: Rebuild Pimcore classes
-        env:
-          APP_ENV: test
-          PIMCORE_TEST: 1
-        run: |
-          bin/console pimcore:deployment:classes-rebuild -c --force
-
-      - name: Download PHPStan
-        run: |
-          wget https://github.com/phpstan/phpstan/releases/download/1.10.50/phpstan.phar
-          chmod +x phpstan.phar
-
-      - name: Run PHPStan
-        env:
-          APP_ENV: test
-          PIMCORE_TEST: 1
-        run: |
-          PHP_VERSION=8.3 ./phpstan.phar analyse --configuration phpstan.neon --no-progress --autoload-file vendor/autoload.php
+          installComposer: 1
+          phpstanVersion: ^1.10
+          level: 5
+          paths: src tests
+          useBundled: 1
+          configPath: phpstan.neon.dist
+          arguments: --memory-limit=1G
