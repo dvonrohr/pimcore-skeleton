@@ -4,13 +4,14 @@ includes:
 
 parameters:
   level: 6
-  reportUnmatchedIgnoredErrors: false
-  paths:
+  paths: 
     - src
+  reportUnmatchedIgnoredErrors: false
   scanFiles:
     - '%currentWorkingDirectory%/vendor/pimcore/pimcore/lib/helper-functions.php'
   symfony:
     containerXmlPath: null
   excludePaths:
+    - vendor
     - 'src/Model/DataObject/*.php'
   ignoreErrors: []
