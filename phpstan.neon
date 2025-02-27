@@ -5,10 +5,12 @@ includes:
 parameters:
   level: 6
   reportUnmatchedIgnoredErrors: false
+  paths:
+    - src
   scanFiles:
     - '%currentWorkingDirectory%/vendor/pimcore/pimcore/lib/helper-functions.php'
   symfony:
-    containerXmlPath: '%currentWorkingDirectory%/var/cache/dev/App_KernelDevDebugContainer.xml'
+    containerXmlPath: null
   excludePaths:
-    - 'src/Model/DataObject/*.php' (?)
+    - 'src/Model/DataObject/*.php'
   ignoreErrors: []
