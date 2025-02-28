@@ -45,7 +45,7 @@
     }
   },
   "scripts": {
-    "phpstan": "php vendor/bin/phpstan analyse -c phpstan.neon src -l 5 --memory_limit=1G",
+    "phpstan": "php vendor/bin/phpstan analyse -c phpstan.neon src -l 5 --memory-limit=1G",
     "check-cs": "php vendor/bin/ecs check --ansi",
     "fix-cs": "php vendor/bin/ecs check --fix --ansi",
     "post-create-project-cmd": "Pimcore\\Composer::postCreateProject",
