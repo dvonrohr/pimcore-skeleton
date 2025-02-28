@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use Pimcore\Version;
-use Pimcore\Model\DataObject\Blog;
 use Pimcore\Controller\FrontendController;
+use Pimcore\Model\DataObject\Blog;
 use Pimcore\Model\DataObject\Blog\Listing;
+use Pimcore\Version;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -30,13 +30,13 @@ class TestController extends FrontendController
     {
         // Create a new Blog listing
         $blogListing = new Listing();
-        
+
         // Get the objects
         $blogs = $blogListing->getObjects();
-        
+
         return $this->json([
             'success' => true,
-            'data' => $blogs
+            'data' => $blogs,
         ]);
     }
 }

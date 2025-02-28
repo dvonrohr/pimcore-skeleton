@@ -1,6 +1,7 @@
 <?php
+
 /**
- * instride AG
+ * instride AG.
  *
  * LICENSE
  *
@@ -14,8 +15,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use Pimcore\Version;
 use Pimcore\Controller\FrontendController;
+use Pimcore\Version;
 use Symfony\Component\HttpFoundation\Response;
 
 class DefaultController extends FrontendController
