@@ -34,5 +34,7 @@ jobs:
           coverage: none
 
       - uses: "ramsey/composer-install@v2"
+        with:
+          composer-options: "--no-scripts --no-interaction"
 
       - run: ${{ matrix.actions.run }}
