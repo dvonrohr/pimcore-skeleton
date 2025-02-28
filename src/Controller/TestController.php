@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use DateTime;
 use Pimcore\Version;
 use Pimcore\Model\DataObject\Blog;
-use Pimcore\Model\DataObject\Post;
 use Pimcore\Controller\FrontendController;
+use Pimcore\Model\DataObject\Blog\Listing;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -18,15 +18,25 @@ class TestController extends FrontendController
     public function blogListAction(): Response
     {
         $blogs = new Blog\Listing();
-        $b = null;
-        $a = $c;
-
-            // This is a comment
 
         return $this->render('blog/list.html.twig', [
             'version' => Version::getVersion(),
             'blogs' => $blogs->getObjects(),
             'formatDate' => [$this, 'formatDate'],
+        ]);
+    }
+
+    public function testAction(Request $request): Response
+    {
+        // Create a new Blog listing
+        $blogListing = new Listing();
+        
+        // Get the objects
+        $blogs = $blogListing->getObjects();
+        
+        return $this->json([
+            'success' => true,
+            'data' => $blogs
         ]);
     }
 }

@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use DateTime;
+use Exception;
 use Pimcore\Version;
 use Pimcore\Model\DataObject\Blog;
 use Pimcore\Model\DataObject\Post;
 use Pimcore\Controller\FrontendController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Controller for handling blog and post related actions
@@ -55,6 +58,18 @@ class BlogController extends FrontendController
     }
 
     /**
+     * Blog index action
+     */
+    public function indexAction(Request $request): Response
+    {
+        $blogListing = new Blog\Listing();
+        
+        return $this->render('blog/index.html.twig', [
+            'blogs' => $blogListing->getObjects()
+        ]);
+    }
+
+    /**
      * Renders the detail page for a specific blog entry
      * 
      * Fetches and displays a single blog entry based on its ID.
@@ -71,8 +86,11 @@ class BlogController extends FrontendController
      * @link   https://your-docs.com/api/blog/{id}
      */
     #[Route('/blog/{id}', name: 'blog_detail', requirements: ['id' => '\d+'])]
-    public function blogDetailAction(int $id): Response
+    public function blogDetailAction(Request $request, int $id): Response
     {
+        $a = 3;
+        $b = 5;
+
         $blog = Blog::getById($id);
 
         if (!$blog instanceof Blog) {
@@ -102,7 +120,7 @@ class BlogController extends FrontendController
      * @todo   Add pagination for comments
      */
     #[Route('/post/{id}', name: 'post_detail', requirements: ['id' => '\d+'])]
-    public function postDetailAction(int $id): Response
+    public function postDetailAction(Request $request, int $id): Response
     {
         $post = Post::getById($id);
 
