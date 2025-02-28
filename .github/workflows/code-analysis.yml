@@ -20,7 +20,7 @@ jobs:
             run: composer validate --ansi
           - 
             name: 'Coding Standard'
-            run: composer fix-cs --ansi
+            run: composer check-cs --ansi
     
     name: ${{ matrix.actions.name }}
     runs-on: ubuntu-latest
