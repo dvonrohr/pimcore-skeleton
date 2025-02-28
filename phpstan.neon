@@ -14,4 +14,13 @@ parameters:
   excludePaths:
     - vendor
     - 'src/Model/DataObject/*.php'
-  ignoreErrors: []
+  ignoreErrors:
+    # Ignore issues with dynamically generated DataObject classes
+    - '#Instantiated class Pimcore\\Model\\DataObject\\[a-zA-Z0-9_\\]+( not found| constructor invoked with \d+ parameters, \d+ required)#'
+    - '#Call to method [a-zA-Z0-9_]+\(\) on an unknown class Pimcore\\Model\\DataObject\\[a-zA-Z0-9_\\]+#'
+    - '#Call to static method [a-zA-Z0-9_]+\(\) on an unknown class Pimcore\\Model\\DataObject\\[a-zA-Z0-9_\\]+#'
+    - '#Class Pimcore\\Model\\DataObject\\[a-zA-Z0-9_\\]+ not found\.#'
+    - '#Property [a-zA-Z0-9_\\$]+ has unknown class Pimcore\\Model\\DataObject\\[a-zA-Z0-9_\\]+ as its type#'
+    - '#Parameter \$[a-zA-Z0-9_]+ of method [a-zA-Z0-9_\\:]+\(\) has invalid type Pimcore\\Model\\DataObject\\[a-zA-Z0-9_\\]+#'
+    - '#Return type of method [a-zA-Z0-9_\\:]+\(\) contains unknown class Pimcore\\Model\\DataObject\\[a-zA-Z0-9_\\]+#'
+    - '#Binary operation "[!=]=" between .+ and Pimcore\\Model\\DataObject\\[a-zA-Z0-9_\\]+ results in an error\.#'
