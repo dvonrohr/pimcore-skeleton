@@ -1,4 +1,4 @@
-name: 'Lint and Format Checks'
+name: Lint and Format Checks
 
 on:
   workflow_run:
@@ -23,7 +23,7 @@ jobs:
         run: npm install
 
       - name: Run ESLint
-        run: npx eslint .
+        run: npx eslint
 
       - name: Run Prettier
         run: npx prettier --check .
