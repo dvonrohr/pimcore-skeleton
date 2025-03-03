@@ -1,4 +1,10 @@
+name: release-please
+
 on:
+  workflow_run:
+    workflows: 
+      - 'Code Analysis' 
+      - 'Lint and Format Checks'
   push:
     branches:
       - main
@@ -7,10 +13,9 @@ permissions:
   contents: write
   pull-requests: write
 
-name: release-please
-
 jobs:
   release-please:
+
     runs-on: ubuntu-latest
     steps:
       - uses: googleapis/release-please-action@v4
