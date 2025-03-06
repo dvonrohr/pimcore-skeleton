@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.1.1](https://github.com/dvonrohr/pimcore-skeleton/compare/v1.1.0...v1.1.1) (2025-03-03)
+
+
+### Miscellaneous Chores
+
+* add GitHub Actions workflow for code analysis with PHPStan and coding standards ([7df56b0](https://github.com/dvonrohr/pimcore-skeleton/commit/7df56b0d619e41a55064079074c14f0fabac4c67))
+* add ignore rules for dynamically generated DataObject classes in PHPStan configuration ([e4acc5a](https://github.com/dvonrohr/pimcore-skeleton/commit/e4acc5ae13e07ae4c525b637c7e438d6379edef7))
+* add PHPStan and ECS scripts to composer.json for code analysis and coding standards checks ([5ed1c42](https://github.com/dvonrohr/pimcore-skeleton/commit/5ed1c4229991aaef6150fb3b415319e2a3948682))
+* add workflow for linting ([66ee054](https://github.com/dvonrohr/pimcore-skeleton/commit/66ee054c684e1aa43dacc239fe53a74c17b2dfbf))
+* add Workflow for tagging ([43e3ac1](https://github.com/dvonrohr/pimcore-skeleton/commit/43e3ac11e7444b454c748ac59375963fff08ab0a))
+* ändere Befehl für Coding Standard-Überprüfung in der Workflow-Konfiguration ([5264888](https://github.com/dvonrohr/pimcore-skeleton/commit/52648887ea58eea6f5a0b01bdc77e1f88fa45f9f))
+* fix coding issues, phpstan should run successfully ([0c71762](https://github.com/dvonrohr/pimcore-skeleton/commit/0c71762a8b2412a950f47448d2f922dd96c45609))
+* korrigiere PHPStan-Skript zur Verwendung von --memory-limit für Konsistenz ([d0b4b9a](https://github.com/dvonrohr/pimcore-skeleton/commit/d0b4b9a8320702e18ad971338b5a9281964c26cf))
+* refine PHPStan workflow and configuration for improved dependency handling and analysis ([84a21f0](https://github.com/dvonrohr/pimcore-skeleton/commit/84a21f0a063ee839beefea89934e4ca97ea8effa))
+* remove PHPStan-Workflow ([ef61159](https://github.com/dvonrohr/pimcore-skeleton/commit/ef611594c8b6359cc09a62946cb2b0f29b612451))
+* remove tagging ([66e29ff](https://github.com/dvonrohr/pimcore-skeleton/commit/66e29ffb92c3c45ea5d40cc0df5ab9f412938d9b))
+* update composer install options in code analysis workflow ([1640151](https://github.com/dvonrohr/pimcore-skeleton/commit/164015154753fa3535f3d852026e79de2964980b))
+* update linting checks and release workflow conditions ([c7641da](https://github.com/dvonrohr/pimcore-skeleton/commit/c7641dad34dc75abe8750d3f90cf5b05446c9f16))
+* update PHPStan script path in composer.json for consistency ([3980f36](https://github.com/dvonrohr/pimcore-skeleton/commit/3980f36aa8d9f79fb396ae65991269f1ed9dbf01))
+* update PHPStan script to use --memory_limit option for clarity ([fe9fe4d](https://github.com/dvonrohr/pimcore-skeleton/commit/fe9fe4d4d97eb718bd6e965caaf5fd2624f17383))
+* update PHPStan workflow to trigger on push and pull request events, and refine configuration ([687e304](https://github.com/dvonrohr/pimcore-skeleton/commit/687e3042f150b4ffac25721e6d846a2f10391808))
+* update release workflow to include completed type and modify git config for tagging ([f1144df](https://github.com/dvonrohr/pimcore-skeleton/commit/f1144dfc6b03c25f8eb7587fe3d67d8411112b70))
+* verbessere Kommentare und Formatierung in BlogController, DefaultController und TestController ([bb2f0e1](https://github.com/dvonrohr/pimcore-skeleton/commit/bb2f0e10d0f726b2cf240ab9f954ca49f26c7d52))
+* Workflows for Linting and Release-Prozess ([f3ca670](https://github.com/dvonrohr/pimcore-skeleton/commit/f3ca670f0693f64d192fa418d9120ba41da8418f))
+
 ## [1.1.0](https://github.com/dvonrohr/pimcore-skeleton/compare/v1.0.1...v1.1.0) (2025-02-25)
 
 
