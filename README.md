@@ -1,4 +1,6 @@
 # Pimcore Skeleton
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdvonrohr%2Fpimcore-skeleton.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdvonrohr%2Fpimcore-skeleton?ref=badge_shield)
+
 
 ## Local Development
 
@@ -33,3 +35,7 @@ yarn install && yarn run dev
 instride AG, Sandgruebestrasse 4, 6210 Sursee, Switzerland  
 https://instride.ch, connect@instride.ch  
 Copyright © 2024 instride AG. All rights reserved.
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdvonrohr%2Fpimcore-skeleton.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdvonrohr%2Fpimcore-skeleton?ref=badge_large)
