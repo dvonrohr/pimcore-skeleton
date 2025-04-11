@@ -50,6 +50,7 @@ jobs:
             composer.lock
             package.json
             package-lock.json
+            yarn.lock
       
       - name: Initialize and update submodules
         run: git submodule update --init --recursive
@@ -69,7 +70,7 @@ jobs:
               - '**/*.ts'
               - '**/*.vue'
               - 'package.json'
-              - 'package-lock.json'
+              - 'yarn.lock'
               - 'vite.config.*'
             any:
               - '**/*'
@@ -82,13 +83,15 @@ jobs:
           key: composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: composer-
       
-      # Verwende strategisches Caching für npm-Abhängigkeiten
-      - name: Cache npm dependencies
+      # Verwende strategisches Caching für Yarn-Abhängigkeiten
+      - name: Cache Yarn dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: npm-
+          path: |
+            .yarn/cache
+            .yarn/install-state.gz
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: yarn-
 
       # Installiere nur die notwendigen Abhängigkeiten basierend auf den Änderungen
       - name: Install PHP
@@ -109,11 +112,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'yarn'
           
       - name: Install JS dependencies
         if: ${{ steps.filter.outputs.js == 'true' }}
-        run: npm ci --production
+        run: |
+          # Prüfe, ob Yarn bereits installiert ist und aktiviere es
+          if ! command -v yarn &> /dev/null; then
+            corepack enable
+            corepack prepare yarn@4.6.0 --activate
+          fi
+          
+          # Installation mit Yarn
+          if [ -f "yarn.lock" ]; then
+            yarn install --immutable --production
+          else
+            yarn install --production
+          fi
 
       # Cache den Build-Kontext für andere Jobs - korrigiert, damit es nicht fehlschlägt
       - name: Create build context
@@ -122,6 +137,9 @@ jobs:
           # Prüfe und kopiere nur, wenn die Verzeichnisse existieren
           if [ -d "vendor" ]; then
             cp -r vendor build-context/
+          fi
+          if [ -d ".yarn" ]; then
+            cp -r .yarn build-context/
           fi
           if [ -d "node_modules" ]; then
             cp -r node_modules build-context/
@@ -290,6 +308,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'yarn'
           
       - name: Download build context
         uses: actions/download-artifact@v4
@@ -297,9 +316,14 @@ jobs:
           name: build-context
           path: .
           
-      - name: Move node_modules directory
+      - name: Move dependencies
         run: |
-          [[ -d build-context/node_modules ]] && mv build-context/node_modules ./
+          if [[ -d build-context/node_modules ]]; then
+            mv build-context/node_modules ./
+          fi
+          if [[ -d build-context/.yarn ]]; then
+            mv build-context/.yarn ./
+          fi
           
       - name: Run ${{ matrix.name }}
         run: ${{ matrix.cmd }}
