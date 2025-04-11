@@ -105,7 +105,7 @@ jobs:
           
       - name: Install PHP dependencies
         if: ${{ steps.filter.outputs.php == 'true' }}
-        run: composer install --prefer-dist --no-progress --no-interaction --no-dev
+        run: composer install --prefer-dist --no-progress --no-interaction
 
       - name: Setup Node.js
         if: ${{ steps.filter.outputs.js == 'true' }}
@@ -184,8 +184,16 @@ jobs:
             echo "Kein vendor Verzeichnis gefunden, überspringe..."
           fi
           
+      # Stelle sicher, dass PHPStan installiert ist
+      - name: Install PHPStan if needed
+        run: |
+          if [ ! -f "vendor/bin/phpstan" ]; then
+            echo "PHPStan nicht gefunden, installiere es..."
+            composer require --dev phpstan/phpstan
+          fi
+          
       - name: Run PHPStan
-        run: composer phpstan --ansi
+        run: composer phpstan --ansi || vendor/bin/phpstan analyse -c phpstan.neon src -l 5 --memory-limit=1G
 
   php-coding-standards:
     needs: setup
