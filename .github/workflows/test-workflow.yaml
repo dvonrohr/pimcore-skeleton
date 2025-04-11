@@ -112,22 +112,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'yarn'
+          
+      - name: Enable Corepack and setup Yarn
+        if: ${{ steps.filter.outputs.js == 'true' }}
+        run: |
+          corepack enable
+          yarn --version
           
       - name: Install JS dependencies
         if: ${{ steps.filter.outputs.js == 'true' }}
         run: |
-          # Prüfe, ob Yarn bereits installiert ist und aktiviere es
-          if ! command -v yarn &> /dev/null; then
-            corepack enable
-            corepack prepare yarn@4.6.0 --activate
-          fi
-          
           # Installation mit Yarn
           if [ -f "yarn.lock" ]; then
-            yarn install --immutable --production
+            yarn install --immutable
           else
-            yarn install --production
+            yarn install
           fi
 
       # Cache den Build-Kontext für andere Jobs - korrigiert, damit es nicht fehlschlägt
@@ -308,7 +307,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'yarn'
+          
+      - name: Enable Corepack and setup Yarn
+        run: |
+          corepack enable
+          yarn --version
           
       - name: Download build context
         uses: actions/download-artifact@v4
