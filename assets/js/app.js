@@ -14,4 +14,4 @@ document.addEventListener("DOMContentLoaded", () => {
   UIkit.component("example", Example);
 });
 
-console.log("hello world");
+console.log("hello world1");
