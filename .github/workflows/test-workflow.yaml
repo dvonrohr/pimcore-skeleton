@@ -124,7 +124,7 @@ jobs:
         run: |
           # Installation mit Yarn
           if [ -f "yarn.lock" ]; then
-            yarn install --immutable
+            yarn install --frozen-lockfile
           else
             yarn install
           fi
