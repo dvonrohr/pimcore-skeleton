@@ -178,7 +178,11 @@ jobs:
           
       - name: Move vendor directory
         run: |
-          [[ -d build-context/vendor ]] && mv build-context/vendor ./
+          if [ -d "build-context/vendor" ]; then
+            mv build-context/vendor ./
+          else
+            echo "Kein vendor Verzeichnis gefunden, überspringe..."
+          fi
           
       - name: Run PHPStan
         run: composer phpstan --ansi
@@ -206,7 +210,11 @@ jobs:
           
       - name: Move vendor directory
         run: |
-          [[ -d build-context/vendor ]] && mv build-context/vendor ./
+          if [ -d "build-context/vendor" ]; then
+            mv build-context/vendor ./
+          else
+            echo "Kein vendor Verzeichnis gefunden, überspringe..."
+          fi
           
       - name: Run Coding Standard check
         run: composer check-cs --ansi
@@ -259,10 +267,14 @@ jobs:
         with:
           name: build-context
           path: .
-          
+            
       - name: Move vendor directory
         run: |
-          [[ -d build-context/vendor ]] && mv build-context/vendor ./
+          if [ -d "build-context/vendor" ]; then
+            mv build-context/vendor ./
+          else
+            echo "Kein vendor Verzeichnis gefunden, überspringe..."
+          fi
           
       # Strategie: Tests in Parallelgruppen aufteilen
       - name: Generate Pimcore classes
@@ -318,14 +330,18 @@ jobs:
         with:
           name: build-context
           path: .
-          
+            
       - name: Move dependencies
         run: |
-          if [[ -d build-context/node_modules ]]; then
+          if [ -d "build-context/node_modules" ]; then
             mv build-context/node_modules ./
+          else
+            echo "Keine node_modules gefunden, überspringe..."
           fi
-          if [[ -d build-context/.yarn ]]; then
+          if [ -d "build-context/.yarn" ]; then
             mv build-context/.yarn ./
+          else
+            echo "Kein .yarn Verzeichnis gefunden, überspringe..."
           fi
           
       - name: Run ${{ matrix.name }}
