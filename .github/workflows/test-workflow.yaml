@@ -124,7 +124,7 @@ jobs:
           
       # Speichere Build-Kontext als Artefakt für andere Jobs
       - name: Upload build context
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-context
           path: build-context
@@ -147,7 +147,7 @@ jobs:
         
       # Schnellere Abhängigkeitswiederherstellung mit Artefakten
       - name: Download build context
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-context
           path: .
@@ -175,7 +175,7 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
         
       - name: Download build context
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-context
           path: .
@@ -231,7 +231,7 @@ jobs:
           mysql password: ${{ secrets.TEST_DATABASE_PASSWORD }}
           
       - name: Download build context
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-context
           path: .
@@ -249,7 +249,7 @@ jobs:
         
       # Teile die Testergebnisse für SonarQube
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: |
@@ -285,7 +285,7 @@ jobs:
           node-version: '22'
           
       - name: Download build context
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-context
           path: .
@@ -299,7 +299,7 @@ jobs:
         
       - name: Upload coverage results
         if: matrix.check == 'test'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: js-coverage
           path: coverage
@@ -337,14 +337,14 @@ jobs:
       # Lade Testergebnisse herunter
       - name: Download PHP test results
         if: ${{ needs.php-tests.result == 'success' }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: test-results
           path: tests/_output
           
       - name: Download JS test results
         if: ${{ needs.js-matrix.result == 'success' }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: js-coverage
           path: coverage
