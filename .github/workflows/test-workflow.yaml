@@ -115,12 +115,19 @@ jobs:
         if: ${{ steps.filter.outputs.js == 'true' }}
         run: npm ci --production
 
-      # Cache den Build-Kontext für andere Jobs
+      # Cache den Build-Kontext für andere Jobs - korrigiert, damit es nicht fehlschlägt
       - name: Create build context
         run: |
           mkdir -p build-context
-          [[ -d vendor ]] && cp -r vendor build-context/
-          [[ -d node_modules ]] && cp -r node_modules build-context/
+          # Prüfe und kopiere nur, wenn die Verzeichnisse existieren
+          if [ -d "vendor" ]; then
+            cp -r vendor build-context/
+          fi
+          if [ -d "node_modules" ]; then
+            cp -r node_modules build-context/
+          fi
+          # Stelle sicher, dass immer mindestens eine Datei im build-context existiert
+          touch build-context/.gitkeep
           
       # Speichere Build-Kontext als Artefakt für andere Jobs
       - name: Upload build context
