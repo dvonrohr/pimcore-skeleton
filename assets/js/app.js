@@ -13,3 +13,5 @@ import "@fontsource/open-sans/700.css";
 document.addEventListener("DOMContentLoaded", () => {
   UIkit.component("example", Example);
 });
+
+console.log("hello world");
