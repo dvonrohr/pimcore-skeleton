@@ -1,0 +1,356 @@
+name: Code analysis, checks and tests
+
+on:
+  push:
+    # Vermeidet doppelte Workflow-Ausführungen bei PRs
+    branches-ignore:
+      - 'dependabot/**'
+  # Ergänze Pull Request Trigger mit path filtering
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+# Workflow-Concurrency begrenzen, um unnötige parallele Ausführungen zu vermeiden
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_ENV: test
+  PIMCORE_TEST_REDIS_DSN: "redis://127.0.0.1:63379"
+  TEST_DATABASE_HOST: 127.0.0.1
+  TEST_RABBIT_MQ_HOST: 127.0.0.1
+  TEST_RABBIT_MQ_PORT: 55672
+  TEST_RABBIT_MQ_USER: guest
+  TEST_RABBIT_MQ_PASSWORD: guest
+  RABBITMQ_URL: "amqp://guest:guest@127.0.0.1:55672/"
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5 # Strategischer Timeout für Setup
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+      php-changes: ${{ steps.filter.outputs.php }}
+      js-changes: ${{ steps.filter.outputs.js }}
+      has-changes: ${{ steps.filter.outputs.any }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Optimierung: Sparse checkout für große Repositories
+          sparse-checkout: |
+            src
+            public
+            assets
+            tests
+            composer.json
+            composer.lock
+            package.json
+            package-lock.json
+      
+      - name: Initialize and update submodules
+        run: git submodule update --init --recursive
+        
+      # Überprüfe, welche Dateitypen geändert wurden
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            php:
+              - '**/*.php'
+              - 'composer.json'
+              - 'composer.lock'
+            js:
+              - '**/*.js'
+              - '**/*.ts'
+              - '**/*.vue'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'vite.config.*'
+            any:
+              - '**/*'
+          
+      # Verwende strategisches Caching für Composer-Abhängigkeiten
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-
+      
+      # Verwende strategisches Caching für npm-Abhängigkeiten
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: npm-
+
+      # Installiere nur die notwendigen Abhängigkeiten basierend auf den Änderungen
+      - name: Install PHP
+        if: ${{ steps.filter.outputs.php == 'true' }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
+          ini-values: memory_limit=-1, date.timezone='UTC'
+          tools: composer:v2
+          
+      - name: Install PHP dependencies
+        if: ${{ steps.filter.outputs.php == 'true' }}
+        run: composer install --prefer-dist --no-progress --no-interaction --no-dev
+
+      - name: Setup Node.js
+        if: ${{ steps.filter.outputs.js == 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          
+      - name: Install JS dependencies
+        if: ${{ steps.filter.outputs.js == 'true' }}
+        run: npm ci --production
+
+      # Cache den Build-Kontext für andere Jobs
+      - name: Create build context
+        run: |
+          mkdir -p build-context
+          [[ -d vendor ]] && cp -r vendor build-context/
+          [[ -d node_modules ]] && cp -r node_modules build-context/
+          
+      # Speichere Build-Kontext als Artefakt für andere Jobs
+      - name: Upload build context
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-context
+          path: build-context
+          retention-days: 1
+
+  php-static-analysis:
+    needs: setup
+    if: ${{ needs.setup.outputs.php-changes == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
+        
+      # Schnellere Abhängigkeitswiederherstellung mit Artefakten
+      - name: Download build context
+        uses: actions/download-artifact@v3
+        with:
+          name: build-context
+          path: .
+          
+      - name: Move vendor directory
+        run: |
+          [[ -d build-context/vendor ]] && mv build-context/vendor ./
+          
+      - name: Run PHPStan
+        run: composer phpstan --ansi
+
+  php-coding-standards:
+    needs: setup
+    if: ${{ needs.setup.outputs.php-changes == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
+        
+      - name: Download build context
+        uses: actions/download-artifact@v3
+        with:
+          name: build-context
+          path: .
+          
+      - name: Move vendor directory
+        run: |
+          [[ -d build-context/vendor ]] && mv build-context/vendor ./
+          
+      - name: Run Coding Standard check
+        run: composer check-cs --ansi
+
+  php-tests:
+    needs: setup
+    if: ${{ needs.setup.outputs.php-changes == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+            - 63379:6379
+      rabbitmq:
+        image: rabbitmq
+        options: >-
+          --health-cmd "rabbitmqctl node_health_check"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+            - 55672:5672
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
+          coverage: xdebug
+          
+      - name: Install MariaDB
+        uses: getong/mariadb-action@v1.11
+        with:
+          mariadb version: '10.6'
+          mysql database: 'testing'
+          mysql user: 'db'
+          mysql password: ${{ secrets.TEST_DATABASE_PASSWORD }}
+          
+      - name: Download build context
+        uses: actions/download-artifact@v3
+        with:
+          name: build-context
+          path: .
+          
+      - name: Move vendor directory
+        run: |
+          [[ -d build-context/vendor ]] && mv build-context/vendor ./
+          
+      # Strategie: Tests in Parallelgruppen aufteilen
+      - name: Generate Pimcore classes
+        run: php bin/console pimcore:deployment:classes-rebuild -f --no-interaction
+        
+      - name: Run codeception tests and coverage
+        run: php vendor/bin/codecept run --disable-coverage-php --phpunit-xml --coverage --coverage-xml
+        
+      # Teile die Testergebnisse für SonarQube
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            tests/_output
+            coverage.xml
+          retention-days: 1
+
+  js-matrix:
+    needs: setup
+    if: ${{ needs.setup.outputs.js-changes == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        check: ['lint', 'format', 'test']
+        include:
+          - check: lint
+            cmd: npx eslint .
+            name: ESLint
+          - check: format
+            cmd: npx prettier --check .
+            name: Prettier
+          - check: test
+            cmd: npx vitest run --coverage
+            name: Vitest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
+      - name: Download build context
+        uses: actions/download-artifact@v3
+        with:
+          name: build-context
+          path: .
+          
+      - name: Move node_modules directory
+        run: |
+          [[ -d build-context/node_modules ]] && mv build-context/node_modules ./
+          
+      - name: Run ${{ matrix.name }}
+        run: ${{ matrix.cmd }}
+        
+      - name: Upload coverage results
+        if: matrix.check == 'test'
+        uses: actions/upload-artifact@v3
+        with:
+          name: js-coverage
+          path: coverage
+          retention-days: 1
+
+  build-check:
+    needs: setup
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Check for Vite build
+        run: |
+          if [ ! -f "public/build/.vite/manifest.json" ]; then
+            echo "::error::🚫 You have to compile a production build before deploying."
+            exit 1
+          else
+            echo "✅ Great! Looks like you've compiled a production build."
+          fi
+
+  sonarqube:
+    needs: [php-tests, js-matrix]
+    if: ${{ always() && (needs.setup.outputs.has-changes == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      # Lade Testergebnisse herunter
+      - name: Download PHP test results
+        if: ${{ needs.php-tests.result == 'success' }}
+        uses: actions/download-artifact@v3
+        with:
+          name: test-results
+          path: tests/_output
+          
+      - name: Download JS test results
+        if: ${{ needs.js-matrix.result == 'success' }}
+        uses: actions/download-artifact@v3
+        with:
+          name: js-coverage
+          path: coverage
+          
+      - name: SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
