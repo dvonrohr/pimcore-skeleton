@@ -2,16 +2,16 @@ name: Code analysis, checks and tests
 
 on:
   push:
-    # Vermeidet doppelte Workflow-Ausführungen bei PRs
+    # Avoids duplicate workflow runs for PRs
     branches-ignore:
       - 'dependabot/**'
-  # Ergänze Pull Request Trigger mit path filtering
+  # Add Pull Request Trigger with path filtering
   pull_request:
     paths-ignore:
       - '**.md'
       - 'docs/**'
 
-# Workflow-Concurrency begrenzen, um unnötige parallele Ausführungen zu vermeiden
+# Limit workflow concurrency to avoid unnecessary parallel executions
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -29,7 +29,7 @@ env:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    timeout-minutes: 5 # Strategischer Timeout für Setup
+    timeout-minutes: 5 # Strategic timeout for setup
     outputs:
       cache-key: ${{ steps.cache-key.outputs.key }}
       php-changes: ${{ steps.filter.outputs.php }}
@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # Optimierung: Sparse checkout für große Repositories
+          # Optimization: Sparse checkout for large repositories
           sparse-checkout: |
             src
             public
@@ -51,11 +51,11 @@ jobs:
             package.json
             package-lock.json
             yarn.lock
-      
+
       - name: Initialize and update submodules
         run: git submodule update --init --recursive
-        
-      # Überprüfe, welche Dateitypen geändert wurden
+
+      # Check which file types have been changed
       - name: Filter changed files
         id: filter
         uses: dorny/paths-filter@v2
@@ -74,17 +74,19 @@ jobs:
               - 'vite.config.*'
             any:
               - '**/*'
-          
-      # Verwende strategisches Caching für Composer-Abhängigkeiten
+
+      # Use strategic caching for Composer dependencies
       - name: Cache Composer dependencies
+        if: ${{ steps.filter.outputs.php == 'true' }}  # Only cache PHP dependencies if PHP files changed
         uses: actions/cache@v3
         with:
           path: ~/.composer/cache
           key: composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: composer-
-      
-      # Verwende strategisches Caching für Yarn-Abhängigkeiten
+
+      # Use strategic caching for Yarn dependencies
       - name: Cache Yarn dependencies
+        if: ${{ steps.filter.outputs.js == 'true' }}  # Only cache JS dependencies if JS files changed
         uses: actions/cache@v3
         with:
           path: |
@@ -92,7 +94,7 @@ jobs:
           key: yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: yarn-
 
-      # Installiere nur die notwendigen Abhängigkeiten basierend auf den Änderungen
+      # Install only the necessary dependencies based on changes
       - name: Install PHP
         if: ${{ steps.filter.outputs.php == 'true' }}
         uses: shivammathur/setup-php@v2
@@ -101,7 +103,7 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
           ini-values: memory_limit=-1, date.timezone='UTC'
           tools: composer:v2
-          
+
       - name: Install PHP dependencies
         if: ${{ steps.filter.outputs.php == 'true' }}
         run: composer install --prefer-dist --no-progress --no-interaction
@@ -111,41 +113,44 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          
+
       - name: Enable Corepack and setup Yarn
         if: ${{ steps.filter.outputs.js == 'true' }}
         run: |
           corepack enable
           yarn --version
-          
+
       - name: Install JS dependencies
         if: ${{ steps.filter.outputs.js == 'true' }}
         run: |
-          # Installation mit Yarn
+          # Installation with Yarn
           if [ -f "yarn.lock" ]; then
             yarn install --immutable
           else
             yarn install
           fi
 
-      # Cache den Build-Kontext für andere Jobs - korrigiert, damit es nicht fehlschlägt
+      # Cache the build context for other jobs - but only create what's needed
       - name: Create build context
         run: |
           mkdir -p build-context
-          # Prüfe und kopiere nur, wenn die Verzeichnisse existieren
-          if [ -d "vendor" ]; then
+          # Only copy vendor if PHP changes were detected
+          if [ "${{ steps.filter.outputs.php }}" == "true" ] && [ -d "vendor" ]; then
             cp -r vendor build-context/
           fi
-          if [ -d ".yarn" ]; then
-            cp -r .yarn build-context/
+          # Only copy node_modules and .yarn if JS changes were detected
+          if [ "${{ steps.filter.outputs.js }}" == "true" ]; then
+            if [ -d ".yarn" ]; then
+              cp -r .yarn build-context/
+            fi
+            if [ -d "node_modules" ]; then
+              cp -r node_modules build-context/
+            fi
           fi
-          if [ -d "node_modules" ]; then
-            cp -r node_modules build-context/
-          fi
-          # Stelle sicher, dass immer mindestens eine Datei im build-context existiert
+          # Ensure that at least one file exists in build-context
           touch build-context/.gitkeep
-          
-      # Speichere Build-Kontext als Artefakt für andere Jobs
+
+      # Save build context as artifact for other jobs
       - name: Upload build context
         uses: actions/upload-artifact@v4
         with:
@@ -161,36 +166,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
-        
-      # Schnellere Abhängigkeitswiederherstellung mit Artefakten
+
+      # Faster dependency restoration with artifacts
       - name: Download build context
         uses: actions/download-artifact@v4
         with:
           name: build-context
           path: .
-          
+
       - name: Move vendor directory
         run: |
           if [ -d "build-context/vendor" ]; then
             mv build-context/vendor ./
           else
-            echo "Kein vendor Verzeichnis gefunden, überspringe..."
+            echo "No vendor directory found, skipping..."
           fi
-          
-      # Stelle sicher, dass PHPStan installiert ist
+
+      # Make sure PHPStan is installed
       - name: Install PHPStan if needed
         run: |
           if [ ! -f "vendor/bin/phpstan" ]; then
-            echo "PHPStan nicht gefunden, installiere es..."
+            echo "PHPStan not found, installing it..."
             composer require --dev phpstan/phpstan
           fi
-          
+
       - name: Run PHPStan
         run: composer phpstan --ansi || vendor/bin/phpstan analyse -c phpstan.neon src -l 5 --memory-limit=1G
 
@@ -202,27 +207,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
-        
+
       - name: Download build context
         uses: actions/download-artifact@v4
         with:
           name: build-context
           path: .
-          
+
       - name: Move vendor directory
         run: |
           if [ -d "build-context/vendor" ]; then
             mv build-context/vendor ./
           else
-            echo "Kein vendor Verzeichnis gefunden, überspringe..."
+            echo "No vendor directory found, skipping..."
           fi
-          
+
       - name: Run Coding Standard check
         run: composer check-cs --ansi
 
@@ -253,14 +258,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
           coverage: xdebug
-          
+
       - name: Install MariaDB
         uses: getong/mariadb-action@v1.11
         with:
@@ -268,29 +273,29 @@ jobs:
           mysql database: 'testing'
           mysql user: 'db'
           mysql password: ${{ secrets.TEST_DATABASE_PASSWORD }}
-          
+
       - name: Download build context
         uses: actions/download-artifact@v4
         with:
           name: build-context
           path: .
-            
+
       - name: Move vendor directory
         run: |
           if [ -d "build-context/vendor" ]; then
             mv build-context/vendor ./
           else
-            echo "Kein vendor Verzeichnis gefunden, überspringe..."
+            echo "No vendor directory found, skipping..."
           fi
-          
-      # Strategie: Tests in Parallelgruppen aufteilen
+
+      # Strategy: Split tests into parallel groups
       - name: Generate Pimcore classes
         run: php bin/console pimcore:deployment:classes-rebuild -f --no-interaction
-        
+
       - name: Run codeception tests and coverage
         run: php vendor/bin/codecept run --disable-coverage-php --phpunit-xml --coverage --coverage-xml
-        
-      # Teile die Testergebnisse für SonarQube
+
+      # Share test results for SonarQube
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
@@ -321,39 +326,39 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          
+
       - name: Enable Corepack and setup Yarn
         run: |
           corepack enable
           yarn --version
-          
+
       - name: Download build context
         uses: actions/download-artifact@v4
         with:
           name: build-context
           path: .
-            
+
       - name: Move dependencies
         run: |
           if [ -d "build-context/node_modules" ]; then
             mv build-context/node_modules ./
           else
-            echo "Keine node_modules gefunden, überspringe..."
+            echo "No node_modules found, skipping..."
           fi
           if [ -d "build-context/.yarn" ]; then
             mv build-context/.yarn ./
           else
-            echo "Kein .yarn Verzeichnis gefunden, überspringe..."
+            echo "No .yarn directory found, skipping..."
           fi
-          
+
       - name: Run ${{ matrix.name }}
         run: ${{ matrix.cmd }}
-        
+
       - name: Upload coverage results
         if: matrix.check == 'test'
         uses: actions/upload-artifact@v4
@@ -370,7 +375,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Check for Vite build
         run: |
           if [ ! -f "public/build/.vite/manifest.json" ]; then
@@ -390,24 +395,25 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
-      # Lade Testergebnisse herunter
+
+      # Download test results
       - name: Download PHP test results
         if: ${{ needs.php-tests.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: test-results
           path: tests/_output
-          
+
       - name: Download JS test results
         if: ${{ needs.js-matrix.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: js-coverage
           path: coverage
-          
+
       - name: SonarQube scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
