@@ -124,7 +124,7 @@ jobs:
         if: ${{ steps.filter.outputs.js == 'true' }}
         run: |
           # Installation with Yarn
-          yarn install --update-lockfile --no-immutable
+          yarn install --refresh-lockfile --no-immutable
 
       # Cache the build context for other jobs - but only create what's needed
       - name: Create build context
