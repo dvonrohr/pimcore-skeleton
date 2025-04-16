@@ -22,6 +22,7 @@ require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
 Bootstrap::setProjectRoot();
 
 return static function (Request $request) {
+    // test
     // Set current request as property on tool
     // as there is no request stack available yet.
     Tool::setCurrentRequest($request);
