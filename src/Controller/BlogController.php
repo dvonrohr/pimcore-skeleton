@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Controller for handling blog and post related actions.
  *
+ * tst
  * This controller provides actions for:
  * - Listing all blog entries
  * - Showing detailed blog views
