@@ -268,7 +268,7 @@ jobs:
           mariadb version: '10.6'
           mysql database: 'testing'
           mysql user: 'db'
-          mysql password: ${{ secrets.TEST_DATABASE_PASSWORD }}
+          mysql password: 'db'
 
       - name: Download build context
         uses: actions/download-artifact@v4
