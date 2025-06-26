@@ -50,7 +50,7 @@ class BlogController extends FrontendController
      *
      * @example GET /blog
      */
-    #[Route('/blog', name: 'blog_list')]
+    #[Route('/blog1', name: 'blog_list')]
     public function blogListAction(): Response
     {
         $blogs = new Blog\Listing();
